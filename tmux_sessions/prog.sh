@@ -96,6 +96,7 @@ function prog
         if [ $changeDirectory -eq 0 ]; then
             popd > $STFU
         fi
+        tmux swap-window -t 0
         tmux attach-session -t "$sessionName"
         return 0
     fi
