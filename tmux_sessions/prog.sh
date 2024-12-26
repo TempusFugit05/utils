@@ -97,6 +97,7 @@ function prog
             popd > $STFU
         fi
         tmux swap-window -t 0
+        xfce4-terminal --maximize --working-directory="$targetDirectory"
         tmux attach-session -t "$sessionName"
         return 0
     fi

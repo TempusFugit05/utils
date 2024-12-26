@@ -55,6 +55,7 @@ function mkall
 {
     mkcompile
     if [ $? -eq 0 ]; then
+        tree --noreport -I "${buildDirName}" .
         mkrun
     fi
 }
