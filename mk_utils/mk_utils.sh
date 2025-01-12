@@ -1,9 +1,30 @@
 #!/bin/bash
 
+export mkcompile mkclear mkrun mkall
+
 STFU="/dev/null"
 buildDirName="build"
+CMAKE_ARGS=""
 
-function mkcompile
+function get_cmake_args()
+{
+    while ! [ $# -eq 0 ]; do
+        case $1 in
+            -cmake_args=*)
+                ARGS=$@
+                ARGS="${ARGS#-cmake_args=*}"
+                ARGS="${ARGS%-make_args*}"
+                CMAKE_ARGS=$ARGS
+                return
+            ;;
+            *)
+                shift 1
+            ;;
+        esac
+    done
+}
+
+function mkcompile()
 {
     if [ -f "CMakeLists.txt" ]; then
         if [ ! -d ${buildDirName} ]; then
@@ -11,7 +32,9 @@ function mkcompile
         fi
         pushd ${buildDirName} > ${STFU}
         returnVal=0
-        cmake ..
+        get_cmake_args $@
+        echo "$CMAKE_ARGS"
+        cmake .. ${CMAKE_ARGS} 
         returnVal=$?
         if [ ${returnVal} -eq 0 ]; then 
             make -j $(nproc --all)
@@ -51,9 +74,9 @@ function mkclear
         printf "Nothing to remove...\n"
     fi
 }
-function mkall
+function mkall()
 {
-    mkcompile
+    mkcompile $@
     if [ $? -eq 0 ]; then
         tree --noreport -I "${buildDirName}" .
         mkrun

@@ -14,7 +14,6 @@ function prog
     secondaryPaneSize=20
     numExtraPanes=1
     targetDirectory=$PWD
-    changeDirectory=0
 
     while ! [ $# -eq 0 ]; do 
         case $1 in
@@ -27,11 +26,6 @@ function prog
             -d|--directory)
                   targetDirectory="$2"
                   shift 2
-            ;;
-            
-            -cd)
-                changeDirectory=1
-                shift 1
             ;;
             
             -e|--extra)
@@ -51,13 +45,8 @@ function prog
         echo "Attaching to existing session..."
         tmux attach-session -t "$sessionName"
         return 0
-
-    else
-        if [ $changeDirectory -eq 1 ]; then
-            cd "$targetDirectory"
-        else
-            pushd "$targetDirectory" > $STFU # pushd to start new panes in the desired directory
-        fi
+    fi
+        cd "$targetDirectory"
         
         # Create initial panes
         tmux new-session -d -n "main" -s "$sessionName"
@@ -93,12 +82,8 @@ function prog
             done
         fi
         
-        if [ $changeDirectory -eq 0 ]; then
-            popd > $STFU
-        fi
         tmux swap-window -t 0
         xfce4-terminal --maximize --working-directory="$targetDirectory"
         tmux attach-session -t "$sessionName"
         return 0
-    fi
 }
