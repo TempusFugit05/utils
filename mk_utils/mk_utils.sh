@@ -51,7 +51,10 @@ function mkrun
 {
     if [ -d ${buildDirName} ]; then
         executables=$(find ${buildDirName} -maxdepth 1 -type f -executable -printf "%p\n")
-        numExecutables=$(wc -l <<< "${executables}")
+        numExecutables=0
+        if [ -n "${executables}" ]; then
+            numExecutables=$(wc -l <<< "${executables}")
+        fi
         if [ ${numExecutables} -eq 1 ]; then
             printf "Executing: ${executables##*/}\n"
             printf "Executable size: %'d\n" $(wc -c < ${executables})
@@ -74,9 +77,17 @@ function mkclear
         printf "Nothing to remove...\n"
     fi
 }
+
 function mkall()
 {
-    mkcompile $@
+    if [[ $1 == "--test=true" ]]; then
+        mkcompile "-cmake_args=-Dtest=true"
+    elif [[ $1 == "--test=false" ]]; then
+        mkcompile "-cmake_args=-Dtest=false"
+    else
+        mkcompile $@
+    fi
+
     if [ $? -eq 0 ]; then
         tree --noreport -I "${buildDirName}" .
         mkrun
